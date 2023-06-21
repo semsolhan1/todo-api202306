@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 @ToString @EqualsAndHashCode
 @NoArgsConstructor @AllArgsConstructor
 @Builder
-public class todoCreateRequest {
+public class TodoCreateRequestDTO {
 
   @NotBlank
   @Size(min = 2, max = 10)
