@@ -12,15 +12,31 @@ import javax.validation.constraints.Size;
 @Builder
 public class TodoCreateRequestDTO {
 
-  @NotBlank
-  @Size(min = 2, max = 10)
-  private String title;
+    @NotBlank
+    @Size(min = 2, max = 10)
+    private String title;
 
-  //dto를 엔터티로 변환
-  public Todo toEntity() {
-    return Todo.builder()
-            .title(this.title)
-            .build();
-  }
+    // dto를 엔터티로 변환
+    public Todo toEntity() {
+        return Todo.builder()
+                .title(this.title)
+                .build();
+    }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

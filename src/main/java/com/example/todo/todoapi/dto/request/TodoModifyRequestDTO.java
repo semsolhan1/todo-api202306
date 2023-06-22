@@ -10,7 +10,8 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class TodoModifyRequestDTO {
 
-  @NotBlank
-  private String id;
-  private boolean done;
+    @NotBlank
+    private String id;
+    private boolean done;
+
 }
