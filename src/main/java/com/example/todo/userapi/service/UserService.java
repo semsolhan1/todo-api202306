@@ -68,7 +68,7 @@ public class UserService {
         String rawPassword = dto.getPassword(); //입력 비번
         String encodedPassword = user.getPassword(); //DB에 저장된 비번
 
-        if (encoder.matches(rawPassword, encodedPassword)) {
+        if (!encoder.matches(rawPassword, encodedPassword)) {
             throw new RuntimeException("비밀번호가 틀렸습니다.");
         }
 

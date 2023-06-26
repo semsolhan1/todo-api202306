@@ -72,7 +72,9 @@ public class UserController {
           @Validated @RequestBody LoginRequestDTO dto
   ) {
     try {
-      LoginResponseDTO responseDTO = userService.authenticate(dto);
+      log.info("/api/auth/signin - POST");
+      LoginResponseDTO responseDTO
+              = userService.authenticate(dto);
 
       return ResponseEntity.ok().body(responseDTO);
     }catch (Exception e) {
