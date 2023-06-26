@@ -54,6 +54,7 @@ public class UserController {
 
     try {
       UserSignUpResponseDTO responseDTO = userService.create(dto);
+      return ResponseEntity.ok().body(responseDTO);
     } catch (NoRegisteredArgumentsException e) {
       log.warn("이메일이 중복되었습니다.");
       return ResponseEntity.badRequest()
@@ -64,7 +65,6 @@ public class UserController {
               .body(e.getMessage());
     }
 
-    return null;
   }
 
   @PostMapping("/signin")

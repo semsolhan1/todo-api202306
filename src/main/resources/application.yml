@@ -12,7 +12,7 @@ spring:
     # ??? ?? ? ?? DB? ?? ???? ??
     database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     database: mysql # DB ?? ??
 
 logging.level:
