@@ -40,10 +40,16 @@ public class TodoController {
 
         try {
             TodoListResponseDTO responseDTO = todoService.create(requestDTO,
-                    userInfo.getUserId());
+                    userInfo);
             return ResponseEntity
                     .ok()
                     .body(responseDTO);
+        } catch (IllegalStateException e) {
+            // 권한 때문에 발생한 예외
+            log.warn(e.getMessage());
+            return ResponseEntity.status(401)
+                    .body(e.getMessage());
+
         } catch (RuntimeException e) {
             log.error(e.getMessage());
             return ResponseEntity

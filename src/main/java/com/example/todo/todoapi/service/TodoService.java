@@ -1,11 +1,13 @@
 package com.example.todo.todoapi.service;
 
+import com.example.todo.auth.TokenUserInfo;
 import com.example.todo.todoapi.dto.request.TodoCreateRequestDTO;
 import com.example.todo.todoapi.dto.request.TodoModifyRequestDTO;
 import com.example.todo.todoapi.dto.response.TodoDetailResponseDTO;
 import com.example.todo.todoapi.dto.response.TodoListResponseDTO;
 import com.example.todo.todoapi.entity.Todo;
 import com.example.todo.todoapi.repository.TodoRepository;
+import com.example.todo.userapi.entity.Role;
 import com.example.todo.userapi.entity.User;
 import com.example.todo.userapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -71,16 +73,23 @@ public class TodoService {
 
     public TodoListResponseDTO create(
             final TodoCreateRequestDTO requestDTO,
-            final String userId
+            final TokenUserInfo userInfo
     )
-            throws RuntimeException {
+            throws RuntimeException, IllegalStateException {
 
-        Todo todo = requestDTO.toEntity(getUser(userId));
+        User foundUser = getUser(userInfo.getUserId());
+        // 권한에 따른 글쓰기 제한 처리
+        // 일반 회원이 일정 5개 초과해서 작성하면 예외를 발생
+        if(userInfo.getRole() == Role.COMMON
+                && todoRepository.countByUser(foundUser) >= 5) {
+            throw new IllegalArgumentException(("일반회원은 더 이상 일정을 작성할 수 없습니다."));
+        }
 
+        Todo todo = requestDTO.toEntity(foundUser);
 
         todoRepository.save(todo);
         log.info("할 일 저장 완료! 제목: {}", requestDTO.getTitle());
-        return retrieve(userId);
+        return retrieve(userInfo.getUserId());
     }
 
     public TodoListResponseDTO update(final TodoModifyRequestDTO requestDTO, String userId)
