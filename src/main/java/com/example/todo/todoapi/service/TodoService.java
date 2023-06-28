@@ -12,11 +12,17 @@ import com.example.todo.userapi.entity.User;
 import com.example.todo.userapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +32,11 @@ import java.util.stream.Collectors;
 public class TodoService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
     private final TodoRepository todoRepository;
+
+    @Value("${upload.path")
+    private String uploadRootPath;
 
     //할 일 목록 조회
     //요청에 따라 데이터 갱신, 수정, 삭제 등이 발생한 후
@@ -107,6 +117,33 @@ public class TodoService {
         return retrieve(userId);
 
     }
+
+    /**
+     * 업로드된 파일을 서버에 저장하고 저장 경로를 리턴
+     * @param originalFile - 업로드 된 파일의 정보
+     * @return 실제로 저장된 이미지 경로
+     */
+
+    public String uploadProfileImage(MultipartFile originalFile) throws IOException {
+
+        //루트 디렉토리가 존재하는 지 확인 후 존재하지 않으면 생성
+        File rootDir = new File(uploadRootPath);
+        if(!rootDir.exists()) rootDir.mkdir();
+
+        // 파일명을유니크하게 변경
+        String uniqueFileName = UUID.randomUUID()
+                + "_" + originalFile.getOriginalFilename();
+
+        //파일을 저장
+        File uploadFile = new File(uploadRootPath + "/" + uniqueFileName);
+        originalFile.transferTo(uploadFile);
+
+        return uniqueFileName;
+
+
+    }
+
+
 }
 
 

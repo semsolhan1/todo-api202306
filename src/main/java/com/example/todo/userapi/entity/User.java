@@ -42,6 +42,9 @@ public class User {
     @Builder.Default
     private Role role = Role.COMMON; //유저 권한
 
+    private String profileImg;
+
+
     // 등급 수정 메서드
     public void changeRole(Role role) {
         this.role = role;
