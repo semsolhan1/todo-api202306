@@ -10,13 +10,21 @@ import com.example.todo.userapi.dto.response.LoginResponseDTO;
 import com.example.todo.userapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.springframework.http.MediaTypeFactory.getMediaType;
 
 @RestController
 @Slf4j
@@ -86,6 +94,77 @@ public class UserController {
     }
 
   }
+
+  // 프로필 사진 이미지 데이터를 클라이언트에게 응답 처리
+  @GetMapping("/load-profile")
+  public ResponseEntity<?> loadFile(
+          @AuthenticationPrincipal TokenUserInfo userInfo
+  ) {
+    log.info("/api/auth/load-profile - GET!, user: {}", userInfo.getEmail());
+
+    try {
+      // 클라이언트가 요청한 프로필 사진을 응답해야 함.
+      //1. 프로필 사진의 경로를 얻어야 함.
+      String filePath
+              = userService.findProfilePath(userInfo.getUserId());
+
+      //2. 얻어낸 파일 경로를 통해서 실제 파일 데이터 로드하기
+      File profileFile = new File(filePath);
+
+      if(!profileFile.exists()) {
+        return ResponseEntity.notFound().build();
+      }
+      // 파일경로가 존재한다면 if문을 넘어서 여기로 온다.
+
+      // 해당 경로에 저장된 파일을 바이트배열로 직렬화 해서 리턴
+      byte[] fileData = FileCopyUtils.copyToByteArray(profileFile);
+
+      //3. 응답 헤더에 컨텐츠 타입을 설정
+      HttpHeaders headers = new HttpHeaders();
+      MediaType contentType = findExtensionAndetMediaType(filePath);
+      if(contentType == null) {
+        return ResponseEntity.internalServerError()
+                .body("발견된 파일은 이미지 파일이 아닙니다.");
+
+      }
+
+      headers.setContentType(contentType);
+
+      return ResponseEntity.ok()
+              .headers(headers)
+              .body(fileData);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.internalServerError() //500 에러
+              .body("파일을 찾을 수 없습니다.");
+    }
+
+  }
+
+  private MediaType findExtensionAndetMediaType(String filePath) {
+
+    // 파일 경로에서 확장자 추출하기
+    // C:/todo_upload/asjkldlkaslkdjc_abc.jpg
+    String ext
+            = filePath.substring(filePath.lastIndexOf(".") + 1);
+
+    // 확장자가 무엇이냐에 따라 리턴을 해줌.
+    switch (ext.toUpperCase()) {
+      case "JPG": case "JPEG":
+        return MediaType.IMAGE_JPEG;
+      case "PNG":
+        return MediaType.IMAGE_PNG;
+      case "GIF":
+        return MediaType.IMAGE_GIF;
+      default:
+        return null;
+
+    }
+
+
+  }
+
 
   @PostMapping("/signin")
   public ResponseEntity<?> signIn(

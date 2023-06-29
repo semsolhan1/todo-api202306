@@ -140,6 +140,12 @@ public class UserService {
 
         return new LoginResponseDTO(saved, token);
     }
+
+    public String findProfilePath(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow();
+        return uploadRootPath + "/" + user.getProfileImg();//풀경로로 리턴
+    }
 }
 
 
