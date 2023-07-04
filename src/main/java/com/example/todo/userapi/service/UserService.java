@@ -2,6 +2,7 @@ package com.example.todo.userapi.service;
 
 import com.example.todo.auth.TokenProvider;
 import com.example.todo.auth.TokenUserInfo;
+import com.example.todo.aws.S3Service;
 import com.example.todo.exception.DuplicatedEmailException;
 import com.example.todo.exception.NoRegisteredArgumentsException;
 import com.example.todo.userapi.dto.UserSignUpResponseDTO;
@@ -30,14 +31,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
     private final TokenProvider tokenProvider;
+    private final S3Service s3Service;
 
-    @Value("${upload.path}")
-    private String uploadRootPath;
+//    @Value("${upload.path}")
+//    private String uploadRootPath;
 
     //회원 가입 처리
     public UserSignUpResponseDTO create(
             final UserRequestSignUpDTO dto,
             final String uploadedFilePath
+
     )
         throws RuntimeException {
 
@@ -74,17 +77,22 @@ public class UserService {
     public String uploadProfileImage(MultipartFile originalFile) throws IOException {
 
         //루트 디렉토리가 존재하는 지 확인 후 존재하지 않으면 생성
-        File rootDir = new File(uploadRootPath);
-        if(!rootDir.exists()) rootDir.mkdir();
+//        File rootDir = new File(uploadRootPath);
+//        if(!rootDir.exists()) rootDir.mkdir();
 
         //파일명을 유니크하게 변경
-        String uniqueFileName = UUID.randomUUID() + "_" + originalFile.getOriginalFilename();
+        String uniqueFileName = UUID.randomUUID()
+                + "_" + originalFile.getOriginalFilename();
 
         //파일을 저장
-        File uploadFile = new File(uploadRootPath + "/" + uniqueFileName);
-        originalFile.transferTo(uploadFile);
+//        File uploadFile = new File(uploadRootPath + "/" + uniqueFileName);
+//        originalFile.transferTo(uploadFile);
 
-        return uniqueFileName;
+        // 파일을 s3 버킷에 저장
+        String uploadUrl = s3Service.uploadToS3Bucket(originalFile.getBytes(), uniqueFileName);
+
+
+        return uploadUrl;
     }
 
 
@@ -144,7 +152,8 @@ public class UserService {
     public String findProfilePath(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow();
-        return uploadRootPath + "/" + user.getProfileImg();//풀경로로 리턴
+//        return uploadRootPath + "/" + user.getProfileImg();//풀경로로 리턴
+        return user.getProfileImg();
     }
 }
 
