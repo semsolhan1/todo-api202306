@@ -21,7 +21,7 @@ class UserRequestSignUpDTOTest {
 
   @Test
   @DisplayName("중복된 이메일로 회원 가입을 시도하면 RuntimeExeption이 발생해야 한다.")
-  void validateEmailTest() {
+  void validateEmailTest(String uploadedFilePath) {
       //given
       String email = "abc1234@naver.com";
 
