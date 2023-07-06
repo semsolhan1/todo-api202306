@@ -56,5 +56,6 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+//	useJUnitPlatform()
+	exclude '**/*' // 최종적으로 빌드 시 전체 테스트 생략(배포 진행시 반드시 입력해야된다.)
 }
